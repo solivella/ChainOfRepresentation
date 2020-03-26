@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1547191951341.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3987234827",
+    "id" : "7B44B001",
+    "lastKnownWriteTime" : 1547193560,
+    "last_content_update" : 1547193560,
+    "path" : "~/Dropbox/ChainBook/Code/Code2_Stage1_CitizensPreferences/2017citizenMoodPlots.R",
+    "project_path" : null,
+    "properties" : {
+        "cursorPosition" : "32,0",
+        "scrollLine" : "13"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

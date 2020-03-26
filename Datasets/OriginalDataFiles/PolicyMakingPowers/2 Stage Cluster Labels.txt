@@ -1,0 +1,95 @@
+
+PRESIDENT CLUSTERS
+Ordered		Current			Label
+3		1			Unilaterally Move the Status Quo
+2		3			Set the Agenda
+1		2			Weak
+
+
+LOWER HOUSE CLUSTERS
+Ordered		Current			Label
+3		1			Unconstrained but often without a Purse1		2			Constrained2		3			Constrained Spenders
+
+
+UPPER HOUSE CLUSTERS
+Ordered		Current			Label
+2		1			Constrained Spenders1		2			Constrained without a Purse3		3			Unconstrained (Question) without a Purse
+
+
+1:3:1
+Unilateral President
+Unilaterally Move the Status Quo
+Constrained Spenders
+Constrained Spenders
+
+
+2:2:2
+Power Vacuum
+Weak
+Constrained
+Constrained without a Purse
+
+
+1:1:3
+Penniless Reaction to Unilateral President
+Unilaterally Move the Status Quo
+Unconstrained but often without a Purse
+Unconstrained (Question) without a Purse
+
+
+2:1:3
+Penniless Congress Meets Weak President
+Weak
+Unconstrained but often without a Purse
+Unconstrained (Question) without a Purse
+
+
+3:1:3
+Tug of War (Over the President's Agenda)
+Set the Agenda
+Unconstrained but often without a Purse
+Unconstrained (Question) without a Purse
+
+
+3:2:2
+President's Agenda Dominates
+Set the Agenda
+Constrained
+Constrained without a Purse
+
+
+*************
+
+
+
+1:2
+Unilateral President
+Unilaterally Move the Status Quo
+Constrained
+
+
+1:1
+Penniless Reaction to Unilateral President
+Unilaterally Move the Status Quo
+Unconstrained but often without a Purse
+
+
+2:1
+Penniless Congress Meets Weak President
+Weak
+Unconstrained but often without a Purse
+
+
+3:2
+President's Agenda Dominates
+Set the Agenda
+Constrained
+
+
+1:3
+Unilateral President
+Unilaterally Move the Status Quo
+Constrained Spenders
+
+
+

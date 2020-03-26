@@ -1,0 +1,335 @@
+########################
+# Models for Ch 9:
+# Policy-makers to
+# Policies.
+########################
+
+#library(rstanarm)
+library(lme4)
+library(texreg)
+library(doMC)
+library(tidyverse)
+
+registerDoMC(12)
+setwd("~/Dropbox/ChainBook/Code/Code9_LinkingStages_PolicyMakers2Policy/")
+
+set.seed(831213)
+
+
+## Helper functions
+bootWrap <- function(.model,.newdata){
+  pred_fun <- function(.) {
+    predict(., newdata=.newdata, allow.new.levels=TRUE, type="response")
+  }
+  bootpred <- lme4::bootMer(.model, pred_fun, nsim=250, use.u=TRUE, type="parametric",parallel = "multicore",ncpus=12)
+  data.frame(pred = apply(bootpred$t, 2, function(x) as.numeric(quantile(x, probs=.5, na.rm=TRUE))),
+             LB = apply(bootpred$t, 2, function(x) as.numeric(quantile(x, probs=.1, na.rm=TRUE))),
+             UB = apply(bootpred$t, 2, function(x) as.numeric(quantile(x, probs=.9, na.rm=TRUE)))
+  )
+}
+
+## Import data
+pow_pref_pol <- read.csv("../../Datasets/FinishedOutput/PowersPrefPolicies.csv")
+
+## Observed levels of congruence
+coll_pref_pol <- pow_pref_pol %>%
+  group_by(country, ProcessCollapsed) %>%
+  summarize("Congruence: Winset_Both" = mean(winset_cong_s_B, na.rm=TRUE),
+            "Congruence: Distribution-to-Policy_Legislature" = mean(mo_cong_s_L,na.rm=TRUE)) %>%
+  gather(var, val, c("Congruence: Winset_Both","Congruence: Distribution-to-Policy_Legislature"))%>%
+  separate(var, into=c("Measure","Branch"), sep="_")
+
+
+pdf("../../BookManuscript/Graphs/ObsCongPMPol.pdf", width=8, height=3.5)
+ggplot(coll_pref_pol, aes(x=Measure, y = val)) +
+  facet_grid(~Branch, scales="free")+
+  geom_boxplot(outlier.color = NA) +
+  xlab("") +
+  ylab("")+
+  theme_bw()
+dev.off()
+
+
+## Models
+
+## Winset one-to-one
+##Evolving
+winset_model_s <- glmer(winset_cong_s_B ~
+                          + gdp2y
+                        + infl2y
+                        + unemp2y
+                        + ExecParty_pref_spline
+                        + MedianParty_pref_spline
+                        + dist_spline
+                        + ProcessCollapsed
+                        + I(ProcessCollapsed^2)
+                        + (1 |ProcessCollapsed)
+                        , family=binomial()
+                        ,data = pow_pref_pol)
+
+##Constant
+winset_model_c <- glmer(winset_cong_s_B ~
+                          + gdp2y
+                        + infl2y
+                        + unemp2y
+                        + ExecParty_pref_const
+                        + MedianParty_pref_const
+                        + dist_const
+                        + ProcessCollapsed
+                        + I(ProcessCollapsed^2)
+                        + (1 |ProcessCollapsed)
+                        , family=binomial()
+                        ,data = pow_pref_pol)
+
+pred_data_1_s <- expand.grid(ProcessCollapsed = 1:7,
+                             infl2y = mean(pow_pref_pol$infl2y, na.rm=TRUE),
+                             gdp2y = mean(pow_pref_pol$gdp2y, na.rm=TRUE),
+                             unemp2y = mean(pow_pref_pol$unemp2y, na.rm=TRUE),
+                             ExecParty_pref_spline = mean(pow_pref_pol$ExecParty_pref_spline, na.rm=TRUE),
+                             MedianParty_pref_spline = mean(pow_pref_pol$MedianParty_pref_spline, na.rm=TRUE),
+                             dist_spline = mean(pow_pref_pol$dist_spline, na.rm=TRUE))
+pred_1_s_boot <- bootWrap(winset_model_s, pred_data_1_s)
+pred_data_1_s <- pred_data_1_s %>%
+  mutate(Interpolation = "Evolving") %>%
+  bind_cols(pred_1_s_boot)
+
+pred_data_1_c <- expand.grid(ProcessCollapsed = 1:7,
+                             infl2y = mean(pow_pref_pol$infl2y, na.rm=TRUE),
+                             gdp2y = mean(pow_pref_pol$gdp2y, na.rm=TRUE),
+                             unemp2y = mean(pow_pref_pol$unemp2y, na.rm=TRUE),
+                             ExecParty_pref_const = mean(pow_pref_pol$ExecParty_pref_const, na.rm=TRUE),
+                             MedianParty_pref_const = mean(pow_pref_pol$MedianParty_pref_const, na.rm=TRUE),
+                             dist_const = mean(pow_pref_pol$dist_const, na.rm=TRUE))
+pred_1_c_boot <- bootWrap(winset_model_c, pred_data_1_c)
+
+pred_data_1_c <- pred_data_1_c %>%
+  mutate(Interpolation = "Constant") %>%
+  bind_cols(pred_1_c_boot)
+
+pred_data_1 <- rbind(pred_data_1_s[,c("ProcessCollapsed","pred","UB","LB","Interpolation")], pred_data_1_c[,c("ProcessCollapsed","pred","UB","LB","Interpolation")])
+pred_data_1$CongruenceType = "Winset Congruence (probability of being in winset)"
+
+## MANY TO ONE
+## Evolving
+cong_model_s_mo <- lmer(mo_cong_s_L ~  -1
+                        + gdp2y
+                        + infl2y
+                        + unemp2y
+                        + ExecParty_pref_spline
+                        + MedianParty_pref_spline
+                        + dist_spline
+                        + ProcessCollapsed
+                        + I(ProcessCollapsed^2)
+                        + (1 |ProcessCollapsed)
+                        ,data = pow_pref_pol)
+## Many to one, const
+
+cong_model_c_mo <- lmer(mo_cong_c_L ~  -1
+                        + gdp2y
+                        + infl2y
+                        + unemp2y
+                        + ExecParty_pref_const
+                        + MedianParty_pref_const
+                        + dist_const
+                        + ProcessCollapsed
+                        + I(ProcessCollapsed^2)
+                        + (1 |ProcessCollapsed)
+                        ,data = pow_pref_pol)
+
+pred_data_2_s <- expand.grid(ProcessCollapsed = 1:7,
+                             infl2y = mean(pow_pref_pol$infl2y, na.rm=TRUE),
+                             gdp2y = mean(pow_pref_pol$gdp2y, na.rm=TRUE),
+                             unemp2y = mean(pow_pref_pol$unemp2y, na.rm=TRUE),
+                             ExecParty_pref_spline = mean(pow_pref_pol$ExecParty_pref_spline, na.rm=TRUE),
+                             MedianParty_pref_spline = mean(pow_pref_pol$MedianParty_pref_spline, na.rm=TRUE),
+                             dist_spline = mean(pow_pref_pol$dist_spline, na.rm=TRUE))
+pred_2_s_boot <- bootWrap(cong_model_s_mo, pred_data_2_s)
+
+pred_data_2_s <- pred_data_2_s %>%
+  mutate(Interpolation = "Evolving")%>%
+  bind_cols(pred_2_s_boot)
+
+pred_data_2_c <- expand.grid(ProcessCollapsed = 1:7,
+                             infl2y = mean(pow_pref_pol$infl2y, na.rm=TRUE),
+                             gdp2y = mean(pow_pref_pol$gdp2y, na.rm=TRUE),
+                             unemp2y = mean(pow_pref_pol$unemp2y, na.rm=TRUE),
+                             ExecParty_pref_const = mean(pow_pref_pol$ExecParty_pref_const, na.rm=TRUE),
+                             MedianParty_pref_const = mean(pow_pref_pol$MedianParty_pref_const, na.rm=TRUE),
+                             dist_const = mean(pow_pref_pol$dist_const, na.rm=TRUE))
+pred_2_c_boot <- bootWrap(cong_model_c_mo, pred_data_2_c)
+
+pred_data_2_c <- pred_data_2_c %>%
+  mutate(Interpolation = "Constant")%>%
+  bind_cols(pred_2_c_boot)
+
+pred_data_2 <- rbind(pred_data_2_s[,c("ProcessCollapsed","pred","UB","LB","Interpolation")], pred_data_2_c[,c("ProcessCollapsed","pred","UB","LB","Interpolation")])
+pred_data_2$CongruenceType = "Distribution-to-Policy (Legislatures Only)"
+
+pred_data <- rbind(pred_data_1, pred_data_2)
+
+pdf("../../BookManuscript/Graphs/PMPCongruenceModel.pdf", width=8, height=3)
+PMPCongruenceModel <- ggplot(pred_data, aes(x=ProcessCollapsed, y=pred, pch=Interpolation)) +
+  facet_wrap(~CongruenceType, scale="free_y")+
+  geom_smooth(col="gray70", method="loess",span=2, se=FALSE) +
+  geom_point(aes(ymin=LB, ymax=UB), cex=2.7, position=position_dodge(0.3))+
+  theme_bw() +
+  ylab("Predicted Congruence") +
+  scale_x_continuous("(Legislative <--) Policy-Making Process (--> Executive)", 1:7)
+PMPCongruenceModel
+dev.off()
+PMPCongruenceModel
+
+
+
+
+
+
+
+
+
+#bare_table <- createTexreg(coef.names = )
+
+## Responsiveness
+##Model with two branches
+
+pow_pref_pol$SameDirChangeLeg_c <- with(pow_pref_pol, sign(ChangePolicy*lag_ChangeLPrefConst)>0)
+pow_pref_pol$SameDirChangeExec_c <- with(pow_pref_pol, sign(ChangePolicy*lag_ChangeEPrefConst)>0)
+pow_pref_pol$SameDirChangeLeg_s <- with(pow_pref_pol, sign(ChangePolicy*lag_ChangeLPrefSpline)>0)
+pow_pref_pol$SameDirChangeExec_s <- with(pow_pref_pol, sign(ChangePolicy*lag_ChangeEPrefSpline)>0)
+pow_pref_pol_sub <- pow_pref_pol[with(pow_pref_pol,complete.cases(SameDirChangeLeg_c,
+                                                                  SameDirChangeLeg_s,
+                                                                  gdp2y,
+                                                                  infl2y,
+                                                                  unemp2y,
+                                                                  ExecParty_pref_const,
+                                                                  MedianParty_pref_const,
+                                                                  ProcessCollapsed,
+                                                                  SameDirChangeExec_c,
+                                                                  SameDirChangeExec_s,
+                                                                  dist_const,
+                                                                  dist_spline
+)),]
+pow_pref_pol_sub_1st <- subset(pow_pref_pol_sub, !duplicated(dist_const))
+
+options(mc.cores = 4)
+resp_pp_c <- rstanarm::stan_mvmer(list(SameDirChangeLeg_c ~
+                             +  gdp2y
+                             + infl2y
+                             + unemp2y
+                             + ExecParty_pref_const
+                             + MedianParty_pref_const
+                             + ProcessCollapsed
+                             + I(ProcessCollapsed^2)
+                             + (1|ProcessCollapsed),
+                             SameDirChangeExec_c ~
+                             + gdp2y
+                             + infl2y
+                             + unemp2y
+                             + ExecParty_pref_const
+                             + MedianParty_pref_const
+                             + ProcessCollapsed
+                             + I(ProcessCollapsed^2)
+                             + (1|ProcessCollapsed)),
+                        data = pow_pref_pol_sub_1st,
+                        family = binomial,
+                        iter = 25000,
+                        algorithm = "meanfield"
+                        #,chains=4
+)
+resp_pp_s <- rstanarm::stan_mvmer(list(SameDirChangeLeg_s ~
+                             +  gdp2y
+                             + infl2y
+                             + unemp2y
+                             + ExecParty_pref_spline
+                             + MedianParty_pref_spline
+                             + ProcessCollapsed
+                             + I(ProcessCollapsed^2)
+                             + (1|ProcessCollapsed),
+                             SameDirChangeExec_s ~
+                             + gdp2y
+                             + infl2y
+                             + unemp2y
+                             + ExecParty_pref_spline
+                             + MedianParty_pref_spline
+                             + ProcessCollapsed
+                             + I(ProcessCollapsed^2)
+                             + (1|ProcessCollapsed)),
+                        data = pow_pref_pol_sub,
+                        family = binomial,
+                        iter = 5000,
+                        algorithm = "meanfield"
+                        #,chains=4
+)
+
+pred_data_3_s <- expand.grid(ProcessCollapsed = 1:7,
+                             infl2y = mean(pow_pref_pol$infl2y, na.rm=TRUE),
+                             gdp2y = mean(pow_pref_pol$gdp2y, na.rm=TRUE),
+                             unemp2y = mean(pow_pref_pol$unemp2y, na.rm=TRUE),
+                             ExecParty_pref_spline = mean(pow_pref_pol$ExecParty_pref_spline, na.rm=TRUE),
+                             MedianParty_pref_spline = mean(pow_pref_pol$MedianParty_pref_spline, na.rm=TRUE),
+                             dist_spline = mean(pow_pref_pol$dist_spline, na.rm=TRUE))
+
+preds_s <- data.frame(Pred_Exec = colMeans(rstanarm::posterior_predict(resp_pp_s,pred_data_3_s, m=2)),
+                      Pred_Leg = colMeans(rstanarm::posterior_predict(resp_pp_s,pred_data_3_s, m=1)))
+pred_data_3_s <- pred_data_3_s %>%
+  bind_cols(preds_s) %>%
+  gather(var, val, Pred_Exec:Pred_Leg) %>%
+  separate(var, into=c("Variable", "Branch"), sep="_") %>%
+  spread(Variable, val) %>%
+  mutate(Branch = case_when(Branch=="Exec" ~ "Executive",
+                            Branch=="Leg" ~ "Legislature"),
+         Interpolation="Evolving")
+
+
+pred_data_3_c <- expand.grid(ProcessCollapsed = 1:7,
+                             infl2y = mean(pow_pref_pol$infl2y, na.rm=TRUE),
+                             gdp2y = mean(pow_pref_pol$gdp2y, na.rm=TRUE),
+                             unemp2y = mean(pow_pref_pol$unemp2y, na.rm=TRUE),
+                             ExecParty_pref_const = mean(pow_pref_pol$ExecParty_pref_const, na.rm=TRUE),
+                             MedianParty_pref_const = mean(pow_pref_pol$MedianParty_pref_const, na.rm=TRUE),
+                             dist_const = mean(pow_pref_pol$dist_const, na.rm=TRUE))
+pred_c <- data.frame(Pred_Exec = colMeans(rstanarm::posterior_predict(resp_pp_c,pred_data_3_c, m=2)),
+                     Pred_Leg = colMeans(rstanarm::posterior_predict(resp_pp_c,pred_data_3_c, m=1))
+                     )
+pred_data_3_c <- pred_data_3_c %>%
+  bind_cols(pred_c)%>%
+  gather(var, val, Pred_Exec:Pred_Leg) %>%
+  separate(var, into=c("Variable", "Branch"), sep="_") %>%
+  spread(Variable, val) %>%
+  mutate(Branch = case_when(Branch=="Exec" ~ "Executive",
+                            Branch=="Leg" ~ "Legislature"),
+         Interpolation = "Constant")
+
+pred_data_3 <- rbind(pred_data_3_s[,c("ProcessCollapsed","Pred","Branch","Interpolation")],
+                     pred_data_3_c[,c("ProcessCollapsed","Pred","Branch","Interpolation")])
+
+pdf("../../BookManuscript/Graphs/PMPResponsivenessModel.pdf", width=8, height=3.5)
+PMPResponsivenessModel <- ggplot(pred_data_3, aes(x=ProcessCollapsed, y=Pred, pch=Branch))+
+  facet_wrap(~Interpolation)+
+  geom_smooth(aes(lty=Branch),se=FALSE, col="gray70", method="loess", span=2) +
+  geom_point(cex=2.7,position=position_dodge(0.3))+
+  scale_linetype_manual(values=c("solid", "dotted"))+
+  theme_bw() +
+  ylab("Probability that policy and mood move in the same direction") +
+  scale_x_continuous("(Legislative <--) Policy-Making Process (--> Executive)", 1:7)
+PMPResponsivenessModel
+dev.off()
+PMPResponsivenessModel
+
+
+
+# texreg(list(two_branch_lh_s,two_branch_lh_c),
+#          custom.coef.names = c("(Intercept)"
+#                                ,"Legislator Heterogeneity"
+#                                ,"Inflation"
+#                                ,"Unemployment"
+#                                ,"GDP Growth"
+#                                ,"Legislator Heterogeneity"
+# ),
+#         stars = 0.1,
+#        caption = "Multilevel linear regression of policy orientation on lagged policy-maker moods and controls, by policy-maker mood interpolation strategy. Random intercepts and slopes by branch and policy-making process.",
+#        dcolumn = TRUE,
+#        booktabs = TRUE,
+#        include.aic = FALSE,
+#        custom.model.names = c("Evolving", "Constant"))
+#

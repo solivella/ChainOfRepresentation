@@ -1,0 +1,484 @@
+x %*% V %*% t(x)
+t(x) %*% V %*% x
+b
+t(x) %*% b
+t(x) %*% V %*% x
+sqrt (t(x) %*% V %*% x)
+sqrt (t(x) %*% V %*% x) * 2.04
+-4.97 - 4.78
+-4.97 + 4.78
+exp (-4.97 - 4.78)
+exp (-4.97 + 4.78)
+qnorm (0.025)
+qnorm (0.975)
+pt (1.96, 15)
+help (pt)
+qt (0.975, 15)
+qt (0.975, 14)
+x <- runif (20, 10, 30)
+y <- 2 + x + rnorm (20,0,3)
+plot (y~x)
+y - lm (y~x)$fitted
+sum(y - lm (y~x)$fitted)
+n <- 100#
+y <- rnorm(n, mean = 0, sd = 1)#
+x <- matrix(c(seq(1, 1, length = n),#
+	rnorm(2*n, mean = 0, sd = 1)), ncol=3)
+lm (y~x)
+y
+x
+x <- matrix(c(seq(1, 1, length = n),#
+	rnorm(2*n, mean = 0, sd = 1)), ncol=3)
+beta <- c(3, -2, 2)#
+x <- matrix(c(seq(1, 1, length = n),#
+	rnorm(2*n, mean = 0, sd = 1)), ncol=3)#
+y <- x %*% beta + rnorm(n, mean = 0, sd = 1)
+y
+lm (y ~ x)
+library (mvtnorm)
+help (mvrnorm)
+help (rmvnorm)
+x <- mvrnorm(n, mean = c(2,1), sigma = diag(2))
+x <- rmvnorm(n, mean = c(2,1), sigma = diag(2))
+x
+beta <- c(-2, 2)#
+y <- rep (3, n) + x %*% beta + rnorm(n, mean = 0, sd = 1)
+y
+lm (y~x)
+X <- cbind (rep(1,n), x)
+X
+1 * solve(crossprod(X))
+plot (y~x[,1])
+plot (y~x[,2])
+data <- data.frame (y=y, x=x)
+data
+colnames (data)
+t.sample <- sample (1:nrow(data), j)
+j <- 80#
+t.sample <- sample (1:nrow(data), j)
+j
+t.sample
+library (mvtnorm)#
+# create variables#
+n <- 100#
+beta <- c(-2, 2)#
+x <- rmvnorm(n, mean = c(2,1), sigma = diag(2))#
+y <- rep (3, n) + x %*% beta + rnorm(n, mean = 0, sd = 1)#
+data <- data.frame (y=y, x=x)#
+# Obtain training sample#
+j <- 80#
+t.sample <- sample (1:nrow(data), j)
+with (data[t.sample,], lm (y ~ x))
+lm (y ~ x, data=data[t.sample,])
+library (mvtnorm)#
+# create variables#
+n <- 100#
+beta <- c(-2, 2)#
+x <- rmvnorm(n, mean = c(2,1), sigma = diag(2))#
+y <- rep (3, n) + x %*% beta + rnorm(n, mean = 0, sd = 1)#
+database <- data.frame (y=y, x=x)
+colnames (database)
+j <- 80#
+t.sample <- sample (1:nrow(database), j)#
+lm (y ~ x.1 + x.2, data=database[t.sample,])
+model.1 <- lm (y ~ x.1 + x.2, data=database[t.sample,]) # correct model#
+model.2 <- lm (y ~ x.1, data=database[t.sample,])          # wrong model
+model.1$coef
+str (model.1)
+summary (model.1)
+var (model.1$resid)
+sqrt (var (model.1$resid))
+model.1$df.residual
+crossprod (model.1$resid) / model.1$df.residual
+model.1$resid
+summary(model.1)$sigma
+crossprod (model.1$resid) / model.1$df.residual
+sqrt (crossprod (model.1$resid) / model.1$df.residual)
+summary(model.1)$sigma^2
+summary (database)
+database[-t.sample,]
+database[-t.sample,-y]
+database[-t.sample,-1]
+database[-t.sample,-1] %*% model.1$coef
+model.1$coef
+cbind (rep (1, n-t.sample), database[-t.sample,-1]) %*% model.1$coef
+cbind (rep (1, n-t.sample), database[-t.sample,-1])
+rep (1, (n-t.sample))
+n
+t.sample
+cbind (rep (1, n-j), database[-t.sample,-1]) %*% model.1$coef
+as.matrix (cbind (rep (1, n-j), database[-t.sample,-1])) %*% model.1$coef
+pred.model.2 <- as.matrix (cbind (rep (1, n-j), database[-t.sample,-c(1,3)])) %*% model.1$coef
+pred.model.2 <- as.matrix (cbind (rep (1, n-j), database[-t.sample,-c(1,3)])) %*% model.2$coef
+pred.model.2
+plot (pred.model.1~pred.model.2)
+pred.model.1 <- as.matrix (cbind (rep (1, n-j), database[-t.sample,-1])) %*% model.1$coef
+plot (pred.model.1~pred.model.2)
+plot (y[-t.sample]~pred.model.2)
+plot (y[-t.sample]~pred.model.1)
+cbind (pred.model.1, pred.model.1 - 1.96*se.m1, pred.model.1 + 1.96*se.m1)
+se.m1 <- summary(model.1)$sigma#
+se.m2 <- summary(model.2)$sigma
+cbind (pred.model.1, pred.model.1 - 1.96*se.m1, pred.model.1 + 1.96*se.m1)
+cbind (pred.model.1, pred.model.1 - 1.96*se.m1, pred.model.1 + 1.96*se.m1, y[-t.sample])
+cbind (pred.model.2, pred.model.2 - 1.96*se.m2, pred.model.2 + 1.96*se.m2, y[-t.sample])
+crossprod (y[-t.sample]-pred.model.1)
+crossprod (y[-t.sample]-pred.model.2)
+min (pred.model.1)
+min (pred.model.2)
+max (pred.model.2)
+max (pred.model.1)
+help (hist)
+i=1
+sims <- rnorm (500, pred.model.1[i], se.m1)
+sims
+hist (sims)
+sims <- rnorm (500, pred.model.2[i], se.m2)#
+	hist (sims, xlim=c(-5,5), breaks=15, col="gray")
+sims <- rnorm (500, pred.model.2[i], se.m2)#
+	hist (sims, xlim=c(-7,7), breaks=15, col="gray")
+help (add)
+help (new)
+help (new.plot)
+sims.2 <- rnorm (500, pred.model.2[i], se.m2)#
+    sims.1 <- rnorm (500, pred.model.1[i], se.m1)
+hist (sims.2, xlim=c(-7,7), breaks=15, col="gray", ylab="")#
+	hist (sims.1, breaks=15, add=TRUE)
+sims.2 <- rnorm (500, pred.model.2[i], se.m2)#
+    sims.1 <- rnorm (500, pred.model.1[i], se.m1)#
+	hist (sims.2, xlim=c(-7,7), ylim=c(0, 150), breaks=15, ylab="", axes=F)#
+	hist (sims.1, breaks=15, add=TRUE, col="gray")#
+	axis (1)
+sims.2 <- rnorm (500, pred.model.2[i], se.m2)#
+    sims.1 <- rnorm (500, pred.model.1[i], se.m1)#
+	hist (sims.2, xlim=c(-7,7), ylim=c(0, 120), breaks=15, ylab="", xlab="", axes=F)#
+	hist (sims.1, breaks=15, add=TRUE, col="gray")#
+	axis (1)
+abline (h=y[-t.sample][i])
+abline (v=y[-t.sample][i])
+par (mfrow=c(5,2))#
+for (i in 1:(n-j)) {#
+    sims.2 <- rnorm (500, pred.model.2[i], se.m2)#
+    sims.1 <- rnorm (500, pred.model.1[i], se.m1)#
+	hist (sims.2, xlim=c(-7,7), ylim=c(0, 120), breaks=15, ylab="", xlab="", axes=F)#
+	hist (sims.1, breaks=15, add=TRUE, col="gray")#
+	axis (1)#
+	abline (v=y[-t.sample][i], lwd=3)#
+}
+par (mfrow=c(5,2))#
+for (i in 1:(n-j)) {#
+    sims.2 <- rnorm (500, pred.model.2[i], se.m2)#
+    sims.1 <- rnorm (500, pred.model.1[i], se.m1)#
+	hist (sims.2, xlim=c(-7,7), ylim=c(0, 120), breaks=15, ylab="", xlab="", axes=F, main="")#
+	hist (sims.1, breaks=15, add=TRUE, col="gray")#
+	axis (1)#
+	abline (v=y[-t.sample][i], lwd=3)#
+}
+# Load libraries#
+library (mvtnorm)#
+# create simulated data#
+n <- 100#
+beta <- c(-2, 2)#
+x <- rmvnorm(n, mean = c(2,1), sigma = diag(2))#
+y <- rep (3, n) + x %*% beta + rnorm(n, mean = 0, sd = 1)#
+database <- data.frame (y=y, x=x)#
+# Obtain training sample#
+j <- 79#
+t.sample <- sample (1:nrow(database), j)#
+#
+# Estimate two models of data generating process#
+model.1 <- lm (y ~ x.1 + x.2, data=database[t.sample,]) # correct model#
+model.2 <- lm (y ~ x.1, data=database[t.sample,])          # wrong model#
+#
+# Get point predictions#
+pred.model.1 <- as.matrix (cbind (rep (1, n-j), database[-t.sample,-1])) %*% model.1$coef#
+pred.model.2 <- as.matrix (cbind (rep (1, n-j), database[-t.sample,-c(1,3)])) %*% model.2$coef#
+#
+# Calculate sum of squares of prediction errors for both models#
+print (crossprod (y[-t.sample]-pred.model.1))#
+print (crossprod (y[-t.sample]-pred.model.2))
+# Plot "predictive" distributions for "testing sample"#
+se.m1 <- summary(model.1)$sigma#
+se.m2 <- summary(model.2)$sigma#
+par (mfrow=c(3,3))#
+for (i in 1:(n-j)) {#
+    sims.2 <- rnorm (500, pred.model.2[i], se.m2)#
+    sims.1 <- rnorm (500, pred.model.1[i], se.m1)#
+	hist (sims.2, xlim=c(-7,7), ylim=c(0, 120), breaks=15, ylab="", xlab="", axes=F, main="")#
+	hist (sims.1, breaks=15, add=TRUE, col="gray")#
+	axis (1)#
+	abline (v=y[-t.sample][i], lwd=3)#
+}
+y[i]
+y[-t.sample][i]
+which (y==y[-t.sample][i])
+par (mfrow=c(3,3))#
+for (i in 1:(n-j)) {#
+    sims.2 <- rnorm (500, pred.model.2[i], se.m2)#
+    sims.1 <- rnorm (500, pred.model.1[i], se.m1)#
+	hist (sims.2, xlim=c(-7,7), ylim=c(0, 120), breaks=15, ylab="", xlab="", axes=F, main="")#
+	hist (sims.1, breaks=15, add=TRUE, col="gray")#
+	axis (1)#
+	abline (v=y[-t.sample][i], lwd=3)#
+	legend ("topleft", legend=paste ("obs.", which(y==y[-t.sample][i])))#
+}
+pri <- c(62,30,31,22,20,20)
+pan <- c(72,34,22,11,28,15)
+prd <- c(142,71,22,30,68,19)
+sum (prd)
+sum (pan)
+sum (pri)
+pri.meet <- c(59,39,0,13,19,3)
+pan.meet <- c(39,16,7,25,23,3)
+prd.meet <- c(18,24,1,9,21,2)
+sum (pri.meet)
+sum (prd.meet)
+sum (pan.meet)
+352+75
+x <- c(59,39,0,39,16,7,18,24,1,13,19,3,25,23,3,9,21,2)
+y <- c(62,30,31,72,34,22,142,71,22,22,20,20,11,28,15,30,68,19)
+x+y
+min (x+y)
+max (x+y)
+5710.8 - 5529
+chisq (181.8)
+rchisq()
+help (rchisq)
+pchisq (181.8, 13)
+pchisq (181.8, 29)
+pchisq (181.8, 100)
+pchisq (181.8, 200)
+22/pi
+(22/pi)/2
+((22/pi)/2)^2
+4*pi*((22/pi)/2)^2
+4*pi*((22/pi)/2)^2/2
+1.63969*8
+13/77
+0.025/.013
+pnorm (1.92)
+pnorm (1.923)
+pnorm (1.95)
+pnorm (1.9)
+qnorm (0.95)
+qnorm (0.975)
+.022/.014
+.025/.013
+.41/.32
+.101/.085
+.022/.014
+0.5(3) + 0.3(5) + 0.2(7)
+(0.5*3) + (0.3*5) + (0.2*7)
+help ("load.module")
+??load.module
+library (runjags)
+help ("load.module")
+help (run.jags)
+library (runjags)
+help (run.jags)
+??inv.logit
+library (boot)
+help (inv.logit)
+inv.logit (0)
+inv.logit (0-0.12)
+1000 * .1
+1000  * .001
+100000
+80000000*.001
+log (0)
+pi <- seq (0,1,length=50)
+pi
+pr.success <- pi^2
+plot (pr.success~pi, type="l")
+cost <- 1-pi
+plot (cost~pi, type="l", add=T)
+plot (pr.success~pi, type="l")
+points (xy.coords(pi, cost), type="l")
+pnorm (-3.93 + (0.7* #
+ -0.8834))
+pnorm (-3.93 + (0.7* #
+ 0.81))
+pnorm (-3.93 + (0.7* #
+ 8))
+1-pnorm(2.87/1.17)
+(1-pnorm(2.87/1.17))*2
+(1-pnorm(2.97/1.94))*2
+(1-pnorm(1.25/0.8))*2
+(1-pnorm(.13/0.08))*2
+ln (1000) - ln (900)
+log (1000) - log (900)
+log (200) - log (100)
+(200-100)/100
+log (200) - log (100)
+log (20) - log (10)
+log (2) - log (1)
+(200-100)/100
+(20-10)/10
+(2-1)/1
+92.3*0.69
+166.7 - 92.3*0.69
+x <- rbinom (100)
+x <- rbinom (1, size=100)
+x
+help (rbinom)
+rbinom (100, 1, 0.5)
+y <- rbinom (100, 1, 0.5)
+glm (y ~ 1, family=binomial())
+y <- rbinom (100, 1, 0.8)
+glm (y ~ 1, family=binomial())
+summary (y)
+mean (y)
+contributors()
+demo()
+Japanese
+Hello(Japanese)
+print ("hola")
+library (reshape)#
+library (ggplot2)#
+library (MCMCpack)#
+library (gtools)#
+library (mcmcplots)#
+library (runjags)#
+library (rjags)#
+library (stargazer)#
+library (ltm)#
+library (car)
+graphicsPath <- "~/Dropbox/ChainOfResponsiveness/BookManuscript/Graphs/structuralReformPolicies/"#
+#
+# Identify all indices that we need to import#
+setwd ("~/Dropbox/ChainOfResponsiveness/Versions of SPI/LoraSEPI/updateddataset/")#
+workingPath  <- getwd ()#
+#
+AllData <- read.table ("LoraIndicesUpdated.txt", sep="\t", header=TRUE#
+                       , fileEncoding="UTF-16")#
+#
+colnames (AllData)[grep("TariffDispersion", colnames(AllData))] <- "TradeDispersion"#
+colnames (AllData)[grep("RequiredReserve", colnames(AllData))] <- "ReserveRequirement"#
+colnames (AllData)[grep("TransactionTax", colnames(AllData))] <- "FinancialTransactionTax"#
+colnames (AllData)[grep("^VAT$", colnames(AllData))] <- "VATrate"#
+colnames (AllData)[grep("Privatization1", colnames(AllData))] <- "PrivatizationIndex"#
+colnames (AllData)[grep("Privatization2", colnames(AllData))] <- "PrivatizationIndex2"#
+colnames (AllData)[grep("FiringCost", colnames(AllData))] <- "JobTerminationCost"#
+colnames (AllData)[grep("SocialSecurityCost", colnames(AllData))] <- "SocSecurityTax"#
+colnames (AllData)[grep("WorkingHoursFlexibility", colnames(AllData))] <- "WorkHoursFlexibility"
+Equity  <- AllData$EquityInflow + AllData$EquityOutflow#
+Bond  <- AllData$BondInflow + AllData$BondOutflow#
+MoneyMkt  <- AllData$MoneyMktInflow + AllData$MoneyMktOutflow #
+CollInvest  <- AllData$CollInvestInflow + AllData$CollInvestOutflow#
+Derivatives  <- AllData$DerivativesInflow + AllData$DerivativesOutflow#
+Credit  <- AllData$CreditInflow + AllData$CreditOutflow#
+FinancialCredit  <- AllData$FinancialCreditInflow + AllData$FinancialCreditOutflow#
+Guarantees  <- AllData$GuaranteesInflow + AllData$GuaranteesOutflow#
+DirectInvest  <- AllData$DirectInvestInflow + AllData$DirectInvestOutflow#
+RealEstate  <- AllData$RealEstateInflow + AllData$RealEstateOutflow#
+CapitalControl <- Equity + Bond + MoneyMkt + CollInvest + Derivatives + AllData$DualExchangeRate#
+Credits <- Credit + FinancialCredit #
+Invest <- Guarantees + DirectInvest + RealEstate#
+####################################
+#### MLE graded response setup
+# Ordered variables are: BankSupervQuality, WorkHoursFlexibility, HiringFlexibility, InterestRateLiberalization#
+continuousVars <- c("AverageTariff","TradeDispersion"#
+                    ,"ReserveRequirement","FinancialTransactionTax"#
+                    ,"VATrate","PersonalIncomeTax","CorporateIncomeTax"#
+                    ,"PrivatizationIndex","PrivatizationIndex2","JobTerminationCost"#
+                    ,"SocSecurityTax","MinimumWage","Equity","Bond","MoneyMkt"#
+                    ,"CollInvest","Derivatives","Credit","FinancialCredit"#
+                    ,"Guarantees","DirectInvest","RealEstate")#
+#
+orderedVars <- c("InterestRateLiberalization","BankSupervision"#
+                 ,"HiringFlexibility","WorkHoursFlexibility"#
+                 , colnames(AllData)[grep("Inflow", colnames(AllData))]#
+                 , colnames(AllData)[grep("Outflow", colnames(AllData))])#
+#
+# The following functions apply kmeans to each continuous variable, and produce plots of the ratio #
+# of between SS to total SS (we want to maximize this ratio, I guess)#
+findKmeans <- function (x) {#
+   obj2return <- list ()#
+   for (i in 1:6) {#
+      obj2return[[i]] <- kmeans(na.omit(x), centers=i, nstart=20)#
+   }#
+   return (obj2return)#
+}#
+#
+screeLikePlot <- function (x) {#
+   tmp <- c()#
+   for (i in 1:length(x)) {#
+      tmp[i] <- 100*(x[[i]]$betweenss/x[[i]]$totss)#
+   }#
+   return (tmp)#
+}#
+#
+par (mfrow=c(3,4))#
+for (i in 1:length(continuousVars)) {#
+   temp <- findKmeans (AllData[,grep(continuousVars[i], colnames(AllData))])#
+   plot (screeLikePlot (temp), type="b", main=continuousVars[i])#
+}#
+#
+# The previous analysis shows that 3 categories suffice for most variables, except perhaps
+# (then also AverageTariff) and privatizationIndex and minimumwage, which has 4#
+optimalBinning <- function (x, cats=3) {#
+   clus <- kmeans (na.omit(x), centers=cats, nstart=20)#
+   y <- sort(clus$centers)[-cats] + diff(sort(clus$centers))/2#
+   if (length (y)==2) {#
+      mns <- ifelse ( is.na(x), NA, ifelse ( x <= y[1], 1, ifelse (x >= y[2], 3, 2)))#
+   } else {#
+      mns <- ifelse ( is.na(x), NA, ifelse ( x <= y[1], 1, ifelse ( y[1] < x & x <= y[2], 2, ifelse ( x > y[3], 4, 3))))#
+   }#
+   return (mns)#
+}#
+#
+# Make sure that the plots return correct ordering#
+# Sign next to code suggests how item correlates with pro-state end#
+equity <- optimalBinning (Equity); plot (equity ~ Equity) #+#
+bond <- optimalBinning (Bond); plot (bond ~ Bond) #+#
+moneymkt <- optimalBinning (MoneyMkt); plot (moneymkt ~ MoneyMkt) #+#
+collinvest <- optimalBinning (CollInvest); plot (collinvest ~ CollInvest) #+#
+derivatives <- optimalBinning (Derivatives); plot (derivatives ~ Derivatives) #+#
+credit <- optimalBinning (Credit); plot (credit ~ Credit) #+#
+financecredit <- optimalBinning (FinancialCredit); plot (financecredit ~ FinancialCredit) #+#
+guarantees <- optimalBinning (Guarantees); plot (guarantees ~ Guarantees) #+#
+directinvest <- optimalBinning (DirectInvest); plot (directinvest ~ DirectInvest) #+#
+realestate <- optimalBinning (RealEstate); plot (realestate ~ RealEstate) #+#
+capitalcontrol <- optimalBinning (CapitalControl); plot (capitalcontrol ~ CapitalControl) #+#
+credits <- optimalBinning (Credits); plot (credits ~ Credits)#
+directinvest <- optimalBinning (DirectInvest); plot (directinvest ~ DirectInvest)#
+#
+ResRequire   <- optimalBinning (AllData$ReserveRequirement); plot (ResRequire ~ AllData$ReserveRequirement) #+ #
+#(more and more used as macroprudential countercyclical tools; perhaps this is the best justification to aggregate them in broad categories)#
+JobTermCost  <- optimalBinning (AllData$JobTerminationCost); plot (JobTermCost ~ AllData$JobTerminationCost) #+#
+SocSecurity  <- optimalBinning (AllData$SocSecurityTax); plot (SocSecurity ~ AllData$SocSecurityTax) #+#
+CorporateTax <- optimalBinning (AllData$CorporateIncomeTax); plot (CorporateTax ~ AllData$CorporateIncomeTax) #+#
+PersonalTax  <- optimalBinning (AllData$PersonalIncomeTax); plot (PersonalTax ~ AllData$PersonalIncomeTax) #+#
+VATrate      <- optimalBinning (AllData$VATrate); plot (VATrate ~ AllData$VATrate) #+#
+avgTariff    <- optimalBinning (AllData$AverageTariff, cats=4); plot (avgTariff ~ AllData$AverageTariff) #+#
+tradeDisp    <- optimalBinning (AllData$TradeDispersion, cats=4); plot (tradeDisp ~ AllData$TradeDispersion) #+#
+FinTrans     <- optimalBinning (AllData$FinancialTransactionTax); plot (FinTrans ~ AllData$FinancialTransactionTax) #+#
+MinWage      <- optimalBinning (AllData$MinimumWage, cats=4); plot (MinWage ~ AllData$MinimumWage) #+#
+Privatize    <- optimalBinning (AllData$PrivatizationIndex, cats=4); plot (Privatize ~ AllData$PrivatizationIndex) #-#
+Privatize    <- recode (Privatize, "1=4; 2=3; 3=2; 4=1") #+#
+Privatize2   <- optimalBinning (AllData$PrivatizationIndex2, cats=4); plot (Privatize2 ~ AllData$PrivatizationIndex2) #-#
+Privatize2   <- recode (Privatize2, "1=4; 2=3; 3=2; 4=1") #+#
+#
+BankSuperv <- recode (AllData$BankSupervision, "0=3; 1=2; 2=1") # + (flipped from original)#
+IntRate    <- recode (AllData$InterestRateLiberalization, "0=4; 1=3; 3=1") #+ (flipped from original direction)#
+HireFlex   <- recode (AllData$HiringFlexibility, "1=3; 3=1") #+  (flipped from original direction)#
+WorkFlex   <- AllData$WorkHoursFlexibility #+ (unclear; it appears that larger numbers correspond to extra cost of allowing flexibility in working hours)
+OrderData <- data.frame (ResRequire, JobTermCost, MinWage, SocSecurity, CorporateTax#
+                         , PersonalTax, VATrate, avgTariff, tradeDisp, IntRate#
+                         , FinTrans, Privatize, Privatize2#
+                         , capitalcontrol, credits, directinvest)#
+                         # , Privatize2, WorkFlex#
+                         # , equity, bond, moneymkt, collinvest#
+                         # , derivatives, credit, financecredit#
+                         # , guarantees, directinvest, realestate)  #HireFlex only has two categories after dropping Jamaica, T&T; BankSuperv may not be helpful#
+round (cor (OrderData, method="k", use="p"), 2)
+OrderData
+colnames (OrderData)
+rownames (OrderData)
+length (AllData$coutnry)
+length (AllData$country)
+length (AllData$year)
+data.frame (AllData$country, AllData$year, OrderData)
+stargazer (data.frame (AllData$country, AllData$year, OrderData))
+help (stargazer)
+stargazer (data.frame (AllData$country, AllData$year, OrderData), summary=FALSE, type="latex")

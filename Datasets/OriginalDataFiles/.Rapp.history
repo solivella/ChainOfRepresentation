@@ -1,0 +1,20 @@
+load("/Users/grosas/Dropbox/ChainBook/Datasets/OriginalDataFiles/PELAIndividualResponsesMI.RData")
+load("/Users/grosas/Dropbox/ChainBook/Datasets/OriginalDataFiles/percentData.RData")
+ls ()
+summary (dataEntries)
+dataEntries
+ls ()
+PercentData
+dim (percentEntries)
+ls()
+dim (PercentData)
+length (dataEntries)
+dataEntries[1,]
+dataEntries[1]
+PercentData[1,]
+dataEntries[1:18]
+dataEntries[1:20]
+load("/Users/grosas/Dropbox/ChainBook/Datasets/OriginalDataFiles/PELAIndividualResponses.RData")
+ls ()
+colnames (Aggr.Data.Sal)
+by (Aggr.Data.Sal$LR.ideology.prez1, paste0(Aggr.Data.Sal$pais, Aggr.Data.Sal$year), summary)

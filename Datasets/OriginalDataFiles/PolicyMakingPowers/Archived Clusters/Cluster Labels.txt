@@ -1,0 +1,19 @@
+
+PRESIDENT CLUSTERS
+Ordered		Current		Label
+3			1			Unilaterally Move the Status Quo
+2			3			Set the Agenda
+1			2			Weak
+
+
+LOWER HOUSE CLUSTERS
+Ordered		Current		Label
+3			1			Everything but the Purse
+2			3			Constitutionally Strong, Procedurally Weak
+1			2			Constitutionally Weak, Procedurally Strong
+
+Upper HOUSE CLUSTERS
+Ordered		Current		Label
+3			3			Can't Be Stopped
+2			2			Shoestring
+1			1			Constrained
